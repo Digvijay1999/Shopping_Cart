@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     customer_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
     order_quantity INTEGER NOT NULL,
-    FOREIGN KEY(customer_id)     
+    FOREIGN KEY(customer_id) REFERENCES customer(user_id) ON DELETE CASCADE, 
+    FOREIGN KEY(order_id) REFERENCES orders(order_id) ON DELETE CASCADE   
 )
 
 CREATE TABLE IF NOT EXISTS cart (
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS cart (
 CREATE TABLE IF NOT EXISTS cart_items (
     cart_id INTEGER PRIMARY KEY NOT NULL,
     product_id UNIQUE INTEGER NOT NULL,
+    product_quantity INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (cart_id) REFERENCES cart(cart_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 )
