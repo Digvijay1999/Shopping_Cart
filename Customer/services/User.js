@@ -18,8 +18,31 @@ function signToken(body, id) {
     return jwt.sign({ user: body.username, id: id }, jwtKey, { expiresIn: '24h' })
 }
 
+const checkUsername = function (req) {
+
+    let { username } = req.body
+    let res = pool.query(`SELECT ${username} FROM customer WHERE username = ${username}`);
+    if (res[0].username) {
+        return res[0].username
+    } else {
+        return undefined
+    }
+};
+
+const CheckPassword = async function (req) {
+    let { username, password } = req.body
+    let res = await pool.query(`SELECT ${username} FROM customer WHERE username = "${username}"`)
+    if (res[0].password) {
+        return res[0].password
+    } else {
+        return undefined
+    }
+}
+
 module.exports = {
     createCustomer,
     signToken,
-    getId
+    getId,
+    checkUsername,
+    CheckPassword
 }
