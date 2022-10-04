@@ -1,18 +1,18 @@
-const {
-    db_host,
-    database,
-    user,
-    password,
-    port } = require('../config/config');
-
 const { Pool } = require('pg');
+const {
+    DB_HOST,
+    DATABASE,
+    USER,
+    PASSWORD,
+    PORT
+} = require('../config/environment');
 
 const pool = new Pool({
-    db_host,
-    database,
-    user,
-    password: "Digu@1234",
-    port
+    host: DB_HOST,
+    database: DATABASE,
+    user: USER,
+    password: PASSWORD,
+    port: PORT
 })
 
 pool.on('error', (err) => {
