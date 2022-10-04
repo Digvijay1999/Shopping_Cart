@@ -1,18 +1,26 @@
 const express = require("express");
 const router = express.Router()
+const cookieParser = require("cookie-parser")
 
-const { signup, login } = require('../controllers/User')
+
+const customerControllers = require('../controllers/User')
 
 router
-    .post('/signup', (req, res) => {
+    .post('/signup', async (req, res) => {
+
         console.log("signing up the user " + req.body.username);
-        signup(req);
+        customerControllers.signup(req, res);
+
     })
-    .post('/login', (req, res) => {
+    .post('/login', async (req, res) => {
+
         console.log(req.body.username + " is logging in");
-        login(req)
+        customerControllers.login(req, res)
+
     })
-//.post('/profile')
+    .get('/profile', (req, res) => {
+        customerControllers.profile(req, res);
+    })
 
 
 module.exports = router;
