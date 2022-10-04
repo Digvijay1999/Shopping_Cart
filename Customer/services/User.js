@@ -1,29 +1,27 @@
-const jwt = require('jsonwebtoken')
-const { jwtKey } = require('../config/config')
-const { pool } = require('../database/db._connect');
+const { pool } = require('../database/db._connect')
+const Auth = require('./Auth')
 
 async function createCustomer(req) {
     await pool.query(`INSERT INTO customer (user_id,username,password,address) 
-    VALUES (DEFAULT,'${req.body.username}','${req.body.password}','${req.body.address}'1)`)
+    VALUES (DEFAULT,'${req.body.username}','${req.body.password}','${req.body.address}')`)
 }
 
 async function getId(username) {
-    let res = await pool.query(`SELECT user_id FROM customer WHERE username = ${username}`)
-        .then(() => { console.log("row inserted") })
-        .catch((err) => { console.log("error occured " + err); })
-    return res[0].user_id;
+    let res = await pool.query(`SELECT user_id FROM customer WHERE username = '${username}'`)
+
+    if (res.rowCount == 0) {
+        return null
+    } else {
+        return res.rows[0].user_id;
+    }
 }
 
-function signToken(body, id) {
-    return jwt.sign({ user: body.username, id: id }, jwtKey, { expiresIn: '24h' })
-}
-
-const checkUsername = function (req) {
+const checkUsername = async function (req) {
 
     let { username } = req.body
-    let res = pool.query(`SELECT ${username} FROM customer WHERE username = ${username}`);
-    if (res[0].username) {
-        return res[0].username
+    let res = await pool.query(`SELECT username FROM customer WHERE username = '${username}'`);
+    if (res.rowCount != 0) {
+        return res.rows[0].username
     } else {
         return undefined
     }
@@ -31,18 +29,39 @@ const checkUsername = function (req) {
 
 const CheckPassword = async function (req) {
     let { username, password } = req.body
-    let res = await pool.query(`SELECT ${username} FROM customer WHERE username = "${username}"`)
-    if (res[0].password) {
-        return res[0].password
+    let res = await pool.query(`SELECT password FROM customer WHERE username = '${username}'`)
+    if (res.rowCount != 0) {
+        if (res.rows[0].password == password) {
+            return true
+        }
     } else {
-        return undefined
+        return false
+    }
+}
+
+const getUserDetails = async function (token) {
+    let data = Auth.verifyToken(token)
+    console.log(data);
+    let username
+    if (data) {
+        username = data.user
+        try {
+            let res = await pool.query(`SELECT * FROM customer WHERE username = '${username}'`)
+            return res.rows[0];
+        } catch (error) {
+            console.log(error);
+            return;
+        }
+    } else {
+        return false
     }
 }
 
 module.exports = {
     createCustomer,
-    signToken,
     getId,
     checkUsername,
-    CheckPassword
+    CheckPassword,
+    getUserDetails
 }
+
